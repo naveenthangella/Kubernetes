@@ -1,3 +1,26 @@
 ---
-
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: sample-cm
+data:
+    PROJECT: "Devops-from-configmap"
 ---
+
+kind: Pod
+apiVersion: v1
+metadata:
+  name: 04-cm
+spec:
+  containers:
+    - name: centos
+      image: centos
+      env:
+        - name: PROJECT
+          valueFrom:
+            configMapKeyRef:
+              name: sample-cm
+              key: PROJECT
+      command:
+        - "sleep"
+        - "1000"
