@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: 03-env
+spec:
+  containers:
+    - name: centos
+      image: centos
+      env:
+        - name: "PROJECT"
+          value: "DEVOPS"
+      command:
+        - "sleep"
+        - "1000"
