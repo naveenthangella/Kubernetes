@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: httpd
-          image: naveenthangella/deploy:v1
+          image: naveenthangella/deploy:v2
 
 ---
 kind: Service
