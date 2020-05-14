@@ -1,7 +1,7 @@
-kind: ReplicaSet
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: 01rs
+  name: 01deploy
   labels:
     app: httpd
     tier: frontend
@@ -17,19 +17,19 @@ spec:
     spec:
       containers:
         - name: httpd
-          image: naveenthangella/rs01:v1
+          image: naveenthangella/deploy:v1
 
 ---
 kind: Service
 apiVersion: v1
 metadata:
-  name: rs01-service
+  name: deploy-service
 spec:
-  type: LoadBalancer
   selector:
     tier: frontend
   ports:
     - protocol: TCP
       port: 80
       targetPort: 80
+
 ---
