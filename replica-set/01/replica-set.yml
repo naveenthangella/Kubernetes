@@ -1,1 +1,7 @@
-kind: RelicaSet
+apliVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: 01rs
+  labels:
+    app: httpd
+    tier:
