@@ -1,7 +1,20 @@
-apliVersion: apps/v1
 kind: ReplicaSet
+apiVersion: extensions/v1beta1
 metadata:
   name: 01rs
   labels:
     app: httpd
-    tier:
+    tier: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        tier: frontend
+    spec:
+      containers:
+        - name: httpd
+          image:
