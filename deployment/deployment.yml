@@ -1,0 +1,35 @@
+kind: ReplicaSet
+apiVersion: extensions/v1beta1
+metadata:
+  name: 01rs
+  labels:
+    app: httpd
+    tier: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        tier: frontend
+    spec:
+      containers:
+        - name: httpd
+          image: naveenthangella/rs01:v1
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: rs01-service
+spec:
+  type: LoadBalancer
+  selector:
+    tier: frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
