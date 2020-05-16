@@ -1,0 +1,11 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+    name: db
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: mariadb-claim
+    namespace: db
