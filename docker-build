@@ -1,0 +1,5 @@
+#!/bin/bash
+
+IMAGE = $(head -1 Dockerfile | grep "^#" | sed -e 's/#//')
+[ -z "$IMAGE"] && echo Image name not found && exit
+docker build -t $IMAGE
