@@ -9,3 +9,104 @@ kind: PersistentVolumeClaim
 metadata:
     name: mariadb-claim
     namespace: db
+spec:
+    storageClassName: "gp2"
+    accessModes:
+        - ReadWriteOnce
+    resources:
+      requests:
+        storage: 2Gi
+
+---
+
+kind: Secret
+apiVersion: v1
+metadata:
+  name: mariadb-root-cred
+  namespace: db
+type: Opaque
+data:
+  MARIADB_ROOT_PASSWORD: cm9vdDEyMw==
+
+---
+
+kind: ReplicaSet
+apiVersion: extensions/v1beta1
+metadata:
+  name: mariadb-rs
+  namespace: db
+  labels:
+    app: mariadb
+    tier: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mariadb
+      tier: db
+  template:
+    metadata:
+      labels:
+        app: mariadb
+        tier: db
+    spec:
+      volumes:
+          - name: mariadb-claim
+            persistentVolumeClaim:
+              claimName: mariadb-claim
+      containers:
+          - name: mariadb
+            image: mariadb
+            env:
+                - name: MYSQL_ROOT_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: MARIADB_ROOT_PASSWORD
+                      name: mariadb-root-cred
+            resources:
+              limits:
+                cpu: "500m"
+                memory: "512Mi"
+            volumeMounts:
+                - mountPath: /var/lib/mysql
+                  name: mariadb-claim
+
+---
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: mariadb-schema-setup
+  namespace: db
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+          - name: schema-setup
+            image: naveenthangella/mariadb-job:v1
+            env:
+                - name: DBPASS
+                  valueFrom:
+                    secretKeyRef:
+                      key: MARIADB_ROOT_PASSWORD
+                      name: mariadb-root-cred
+                - name: DBUSER
+                  value: root
+                - name: MARIADB_SERVER
+                  value: mariadb-svc.db.svc.cluster.local
+  backoffLimit: 1
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mariadb-svc
+  namespace: db
+spec:
+  selector:
+    app: mariadb
+    tier: db
+  ports:
+      - protocol: TCP
+        port: 3306
+        targetPort: 3306
