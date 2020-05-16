@@ -1,0 +1,71 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: app
+---
+kind: Secret
+apiVersion: v1
+metadata:
+  name: mariadb-app-cred
+  namespace: app
+type: Opaque
+data:
+  USERNAME: c3R1ZGVudA==
+  PASSWORD: c3R1ZGVudDE=
+
+---
+
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: tomcat-deploy
+  namespace: app
+  labels:
+    app: tomcat
+    tier: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tomcat
+      tier: app
+  template:
+    metadata:
+      labels:
+        app: tomcat
+        tier: app
+    spec:
+      containers:
+        - name: tomcat
+          image: naveenthangella/stomcat:v1
+          env:
+            - name: DBUSER
+              valueFrom:
+                secretKeyRef:
+                  key: USERNAME
+                  name: mariadb-app-cred
+            - name: DBPASS
+              valueFrom:
+                secretKeyRef:
+                  key: DBPASS
+                  name: mariadb-app-cred
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: tomcat-svc
+  namespace: app
+spec:
+  selector:
+    app: tomcat
+    tier: app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
